@@ -4,7 +4,7 @@
 # and uses a Python script to complete the text.
  
 
-create_completion() {
+codex_create_completion() {
     # Get the text typed until now.
     text=${BUFFER}
     #echo $cursor_line $cursor_col
@@ -20,7 +20,7 @@ create_completion() {
 }
 
 # Bind the create_completion function to a key.
-zle -N create_completion
+zle -N codex_create_completion
 
 
 
