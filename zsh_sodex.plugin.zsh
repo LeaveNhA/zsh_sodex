@@ -19,5 +19,14 @@ sodex_create_completion() {
     CURSOR=${#prefix_and_completion}
 }
 
+# Configuration of the plugin.
+# Check if zsodex_config exists as a function and source it.
+if functions -t zsodex_config; then
+    zsodex_config
+else
+    # inform the user it needs a config function before using the plugin
+    echo "zsodex: You need to define a zsodex_config() function in your .zshrc"
+fi
+
 # Bind the create_completion function to a key.
 zle -N sodex_create_completion
