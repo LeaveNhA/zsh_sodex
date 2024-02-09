@@ -17,6 +17,21 @@ N_CONTEXT_KEY = 'SODEX_N_CONTEXT'
 TEMPERATURE_KEY = 'SODEX_TEMPERATURE'
 
 
+model = None
+model_name = os.environ.get(MODEL_KEY, None)
+if model_name == None:
+  sys.stdout.write("No model specified with the environment name:" + MODEL_KEY)
+  exit(0)
+
+# Somehow, Llama cannot use more than 2 GPU layer on MacOS with
+# Apple Silicon devices, which are simply performance cores.
+# TODO: add reference for the geeks and tracking the issue!
+# integer casted variables:
+n_gpu_layers = int(os.environ.get(N_GPU_LAYERS_KEY, 1))
+n_threads = int(os.environ.get(N_THREADS_KEY, 2))
+n_context = int(os.environ.get(N_CONTEXT_KEY, 5_000))
+temperature = int(os.environ.get(TEMPERATURE_KEY, 1.0))
+
 def getSystemInfo():
     '''
     To get system information, such as OS, CPU, etc.
@@ -64,6 +79,13 @@ def get_executables_in_path():
 ## TODO: A caching, maybe??
 executables = get_executables_in_path()
 
+class suppress_stdout_stderr_EMPTY(object):
+    def __enter__(self):
+      return self
+
+    def __exit__(self, *_):
+      return self
+
 class suppress_stdout_stderr_(object):
     def __enter__(self):
         self.outnull_file = open(os.devnull, 'w')
@@ -98,7 +120,6 @@ class suppress_stdout_stderr_(object):
         self.outnull_file.close()
         self.errnull_file.close()
 
-
 class CustomChat(models.LlamaCppChat):
     def get_role_start(self, role_name, **kwargs):
       return ""
@@ -110,32 +131,20 @@ def initialize_model():
     """
     Initialize the Model with Guidance.
     """
-    model_name = os.environ.get(MODEL_KEY, None)
-    if model_name == None:
-      ERROR_ESC = ("No model specified")
-      # TODO: find a related return err code??
-      exit(0)
-
-    n_gpu_layers = os.environ.get(N_GPU_LAYERS_KEY, 1)
-    # Somehow, Llama cannot use more than 2 GPU layer on MacOS with
-    # Apple Silicon devices, which are simply performance cores.
-    # TODO: add reference for the geeks and tracking the issue!
-    n_threads = os.environ.get(N_THREADS_KEY, 2)
-    n_context = os.environ.get(N_CONTEXT_KEY, 5_000)
-    temperature = os.environ.get(TEMPERATURE_KEY, 1.0)
-
     # #001 : Bug?
     # Internally, the call goes like: CustomChat -> LlamaCpp:python-binding -> ...
     # Because of the verbose implementation on Llama internals, it uses almost the same approach
     # to suppress (or not) the output to STDERR and STDOUT.
     # To avoid a very strange debug, I verbose it and bypass it's internal dealing with STDOUT and STDERR.
     # And handle the suppression in my side of code-base.
-    model = CustomChat(model_name, n_gpu_layers=n_gpu_layers, n_ctx=n_context, n_threads=n_threads, temperature=temperature, verbose=True)
-    return model
-
+    return CustomChat(model_name, n_gpu_layers=n_gpu_layers, n_ctx=n_context, n_threads=n_threads, temperature=temperature, verbose=True)
 
 with suppress_stdout_stderr_():
   model = initialize_model()
+  if model == None:
+    sys.stdout.write(ERROR_ESC)
+    exit(0)
+
 cursor_position_char = int(sys.argv[1])
 
 # Read the input prompt from stdin.
@@ -165,5 +174,3 @@ sys.stdout.write(f"\n{llm['app']} {llm['args']}")
 with suppress_stdout_stderr_():
   del llm
   del model
-
-sys.stdout.write(ERROR_ESC)
