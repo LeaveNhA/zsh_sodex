@@ -131,11 +131,11 @@ def initialize_model():
     # To avoid a very strange debug, I verbose it and bypass it's internal dealing with STDOUT and STDERR.
     # And handle the suppression in my side of code-base.
     model = CustomChat(model_name, n_gpu_layers=n_gpu_layers, n_ctx=n_context, n_threads=n_threads, temperature=temperature, verbose=True)
-    return model, model_name
+    return model
 
 
 with suppress_stdout_stderr_():
-  model, model_name = initialize_model()
+  model = initialize_model()
 cursor_position_char = int(sys.argv[1])
 
 # Read the input prompt from stdin.
