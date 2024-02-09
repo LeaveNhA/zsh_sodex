@@ -1,7 +1,7 @@
 <h1 align="center">⌨️ 🦾 Zsh SOdex forked from Zsh Codex</h1>
 
 <p align="center">
-    AI in the command line with Guidance!
+    AI in the command line with Guidance 🌟!
 </p>
 
 <p align="center">
@@ -63,14 +63,27 @@ git clone https://github.com/LeaveNhA/zsh_sodex.git ~/.oh-my-zsh/custom/plugins/
 
 Using oh-my-zsh:
 ```
+    # ZSodex configuration
+    function zsodex_config() {
+        SODEX_PREFERRED_LLM_MODEL='~/.cache/huggingface/hub/models--TheBloke--stable-code-3b-GGUF/snapshots/53430e2b42177f12f2fe8c844cd47211756ca072/stable-code-3b.Q4_K_M.gguf'
+        SODEX_LLAMA_N_GPU=999 # since I have a 64GB ram.
+        SODEX_N_THREADS=2 # since I'm on a Apple Silicon based machine.
+        SODEX_N_CONTEXT=5000 # For extreme cases.
+        SODEX_TEMPERATURE=1 # I like it that way but you can configure it.
+    }
+
     plugins=(zsh_codex)
     bindkey '^X' create_completion
+    # Or bind it for Vi mode:
+    zvm_bindkey vicmd 'zm' sodex_create_completion
 ```
+
 Without oh-my-zsh:
 ```
     # in your/custom/path you need to have a "plugins" folder and in there you clone the repository as zsh_codex
     export ZSH_CUSTOM="your/custom/path"
     source "$ZSH_CUSTOM/plugins/zsh_sodex/zsh_sodex.plugin.zsh"
+    # You still need config function to set the variables.
     bindkey '^X' create_completion
 ```
 
