@@ -50,7 +50,7 @@ To use this plugin you need to get access to OpenAI's [Codex API](https://openai
 ### Manual Installation
 1. Install the OpenAI package.
 ```
-pip3 install openai
+pip3 install openai guidance
 ```
 
 2. Download the ZSH plugin.
